@@ -1,5 +1,5 @@
 var api_url = 'https://backend-challenge-fall-2017.herokuapp.com/orders.json';
-
+const _ = require('lodash');
 const getJSON = require('get-json');
 var orders = [];
 //get list of all api_urls based on pages
@@ -13,6 +13,7 @@ var getUrl_list = (api_url, callback) => {
             var url = api_url + '?page=' + i;
             list_url.push(url);
         }
+        console.log(list_url);
         callback(list_url)
     })
 };
@@ -36,16 +37,21 @@ var getData = (url, callback) => {
                 data.fulfilled = order.fulfilled;
             }
             if (data.hasOwnProperty('products') && data.hasOwnProperty('fulfilled')) {
-                orders.push(data);
-                res['orders'] = orders;
+                if (!(containsObject(data, orders))) {
+                    console.log('if not contained executed')
+                    orders.push(data);
+                    res['orders'] = orders;
+                }
             }
         })
+        console.log(orders);
         callback(res);
     });
 }
 
 //sort data by amount of cookies, and by id, get amount of remaining cookies
 var getOrders = (response, callback) => {
+    //console.log(`getOrders response ${response}`);
     var obj = {}
     var available_cookies = response.available_cookies;
     var remaining_cookies = available_cookies;
@@ -72,6 +78,7 @@ var getOrders = (response, callback) => {
 
 //get unfulfilled result based on amount of cookie and id of order.
 var getUnfulfilled = (obj) => {
+    //console.log(obj);
     var remaining = obj.remaining_cookies;
     var sorted = obj.sorted_orders;
     var result = {}
@@ -86,11 +93,19 @@ var getUnfulfilled = (obj) => {
             remaining -= item.amount_cookie;
         }
     }
-    result['remaining_cookies'] = remaining;
-    result['unfulfilled_orders'] = unfulfilled_orders;
-    return result
+    if (Object.keys(result.length === 0)) {
+        result['remaining_cookies'] = remaining;
+        result['unfulfilled_orders'] = unfulfilled_orders;
+        return result
+    }
 }
 
+//when refreshing page, check that orders aren't duplicated
+var containsObject = (data, orders) => {
+    for (var i=0; i<orders.length;i++){
+        return _.isEqual(orders[i], data)
+    }
+}
 
 module.exports = { getData, getUrl_list, getOrders, getUnfulfilled };
 

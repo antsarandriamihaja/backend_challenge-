@@ -11,10 +11,10 @@ app.get('/', (req, res) => {
         var count = 0;
         for (var i = 0; i < list.length; i++) {
             var url = list[i];
-            var orders = getData(url, (response) => {
-                 count ++;
-                if (count === list.length){
-                    getOrders(response, (obj)=>{
+            getData(url, (response) => {
+                count++;
+                if (count === list.length) {
+                    getOrders(response, (obj) => {
                         res.send(getUnfulfilled(obj));
                     });
                 }
@@ -26,3 +26,5 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
 })
+
+//heroku: https://blooming-eyrie-19749.herokuapp.com/
